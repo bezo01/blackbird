@@ -28,7 +28,7 @@ button{font-family:var(--sans);cursor:pointer}
 header{position:sticky;top:0;z-index:20;background:rgba(15,19,24,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
 .hbar{max-width:760px;margin:0 auto;padding:11px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
-.bird{width:28px;height:28px;flex:0 0 auto}
+.bird{font-size:24px;line-height:1;flex:0 0 auto}
 .brand h1{font-size:16px;font-weight:600;margin:0;letter-spacing:.2px;white-space:nowrap}
 .brand .sub{font-size:10px;color:var(--faint);letter-spacing:1.4px;text-transform:uppercase}
 .nav{display:flex;gap:4px;flex-wrap:wrap}
@@ -79,7 +79,7 @@ input:focus,.opt:focus-visible,button:focus-visible{outline:2px solid var(--sel)
 .btn.danger{color:var(--red);border-color:var(--red-d)}
 .btn:disabled{opacity:.45}
 
-.verdict{border-radius:var(--r);padding:18px;border:1px solid;display:flex;gap:14px;align-items:flex-start}
+.verdict{margin-top:18px;border-radius:var(--r);padding:18px;border:1px solid;display:flex;gap:14px;align-items:flex-start}
 .verdict .light{width:14px;height:14px;border-radius:50%;margin-top:5px;flex:0 0 auto}
 .verdict h2{margin:0 0 4px;font-size:18px}
 .verdict p{margin:0;font-size:13.5px;color:var(--muted)}
@@ -136,9 +136,7 @@ input:focus,.opt:focus-visible,button:focus-visible{outline:2px solid var(--sel)
 <header>
   <div class="hbar">
     <div class="brand">
-      <svg class="bird" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-        <path d="M8 40c10 4 18 2 24-4 3 8 10 12 22 11-6 5-13 7-21 6 2 5 7 8 14 9-10 4-20 1-27-7-5 5-11 7-18 6 4-3 8-7 10-12-7-2-12-7-13-14 6 5 12 7 18 6-7-3-12-9-13-18 8 7 16 11 24 12-3-4-4-9-3-15 7 9 14 14 21 16-7 5-15 5-24 1 .3 4 2 7 5 10-9 1-16-2-21-9z" fill="#e3a93c"/>
-      </svg>
+      <span class="bird" aria-hidden="true">🐦‍⬛</span>
       <div><h1>Black Bird</h1><div class="sub">Pre-Trade Questionnaire</div></div>
     </div>
     <nav class="nav" id="nav">
@@ -200,10 +198,6 @@ var DEFAULT_QUESTIONS=[
   help:"Защитный опцион противоположной стороны: под лонг — PUT, под шорт — CALL.",unit:"USDT",dependsHedge:true},
  {key:"hedge_prem",block:1,type:"number",label:"Премия хедж-опциона (markPrice), USDT",
   help:"Текущая рыночная цена опциона. По ней считается безубыток хеджа по споту.",unit:"USDT",dependsHedge:true},
- {key:"opt_strike",block:1,type:"number",label:"Страйк опциона, USDT",
-  help:"Для расчёта безубытка опциона по движению спота.",unit:"USDT",dependsOption:true},
- {key:"opt_prem",block:1,type:"number",label:"Премия опциона (markPrice), USDT",
-  help:"Текущая рыночная цена опциона.",unit:"USDT",dependsOption:true},
 
  {key:"basis",block:2,type:"multi",label:"Основание входа (можно несколько)",help:"",
   options:["Уровень / структура","Пробой","Индикатор-сигнал","Новостной катализатор","Интуиция"]},
@@ -215,9 +209,11 @@ var DEFAULT_QUESTIONS=[
  {key:"confidence",block:2,type:"single",label:"Уверенность в выбранном горизонте удержания",help:"",
   options:["Низкая","Средняя","Высокая"]},
 
- {key:"atr",block:3,type:"number",label:"ATR(1H), USDT",help:"Для сверки уровня отмены с волатильностью (норма стопа 1.5–2.0 ATR).",unit:"USDT"},
+ {key:"atr",block:3,type:"number",label:"ATR(1H), USDT",help:"Для сверки уровня отмены с волатильностью (норма стопа 1.5–2.0 ATR).",unit:"USDT",hideIfOption:true},
  {key:"iv",block:3,type:"number",label:"ATM IV, % (годовая)",
   help:"Управляет выбором срока опциона. Из неё же оценивается среднедневное движение: ADR% ≈ IV ÷ √252.",unit:"%"},
+ {key:"opt_strike",block:3,type:"number",label:"Страйк опциона, USDT",help:"Для расчёта безубытка опциона по движению спота. Сверху — рекомендация по подбору с учётом IV.",unit:"USDT",dependsOption:true},
+ {key:"opt_prem",block:3,type:"number",label:"Премия опциона (markPrice), USDT",help:"Текущая рыночная цена опциона.",unit:"USDT",dependsOption:true},
  {key:"deposit",block:3,type:"number",label:"Размер депозита, USDT",
   help:"Нужен, чтобы перепроверить, не превышает ли риск ваш бюджет.",unit:"USDT"},
  {key:"riskmode",block:3,type:"single",label:"Бюджет риска на сделку задаём в",help:"",
@@ -237,21 +233,23 @@ var DEFAULT_REC={
  notrigger:"Нет конкретного триггера — вход преждевременный. Дождитесь сигнала.",
  counter:"Контртрендовый вход без подтверждения разворота — «ловля ножей». Дождитесь подтверждения смены тренда или откажитесь.",
  nosl:"Позиция больше 1 контракта без SL и без хеджа. Защита обязательна.",
- rrlow:"Ожидаемый RR ниже целевого 1:2. Варианты: поднять цель по доходности; перенести уровень отмены ближе (риск раннего выбивания); не входить; либо частичный хедж опционом.",
- smallfut:"На малое движение (<3%) не закладывайте удержание фьючерса дольше 1 дня.",
- belowadr:"Ожидаемое движение меньше среднедневного — это в пределах дневного шума, край слабый. На фьючерсе лучше не открывать.",
+ rrlow:"Ожидаемый RR ниже целевого 1:2. Варианты: поднять цель по доходности, перенести уровень отмены ближе (риск раннего выбивания), не входить, либо частичный хедж опционом.",
+ smallfut:"На малое движение (<3%) не закладывайте удержание фьючерса дольше 1 дня: цель в пределах дневного хода обычно достигается за день, а дольше держать — значит набирать риск разворота и издержки фандинга без дополнительного потенциала.",
+ belowadr:"Ожидаемое движение меньше среднедневного — оно в пределах дневного шума: цель часто достигается случайным колебанием, а короткий стоп на фьючерсе выбьет раньше хода, поэтому на фьючерсе лучше не открывать",
  news:"На горизонт сделки есть крупное событие. Гэп-риск повышен: переждите выход новости или уменьшите размер.",
  trendunk:"Тренд не определён — вход рискован: вы не знаете, не идёт ли сделка против тренда. Сначала определите направление рынка.",
- cancelside:"Уровень отмены стоит не с той стороны от входа (для лонга он должен быть ниже цены, для шорта — выше). Проверьте."
+ cancelside:"Уровень отмены стоит не с той стороны от входа (для лонга он должен быть ниже цены, для шорта — выше). Проверьте.",
+ lowconf:"Низкая уверенность в выбранном горизонте — лучше не заходить в сделку: без веры в тайминг позиция держится на удаче.",
+ optadv:"Преимущество опциона перед фьючерсом: убыток ограничен уплаченной премией — нет ликвидации и не нужен стоп, который выбивает шумом, а в сторону движения опцион работает как фьючерс с плечом. Поэтому при крупном или быстром движении и при высоком плече он предпочтительнее."
 };
 
 var TERMS={
  instrument:"Фьючерс — ставка на движение цены с плечом, прибыль и убыток растут симметрично. Опцион — право (не обязанность) купить/продать по фиксированной цене; в сторону движения работает как фьючерс с плечом, против — теряет медленнее, но платит «за время».",
- price:"Базовый актив — то, на чём вы зарабатываете (здесь ETH). Текущая цена — отправная точка всех расчётов.",
+ price:"Базовый актив — то, на чём вы зарабатываете. Текущая цена — отправная точка всех расчётов.",
  target:"Целевой уровень — цена, до которой вы ждёте движение. Разница с текущей ценой — это ваша ожидаемая доходность по сделке.",
  trend:"Тренд — преобладающее направление цены. Входить против тренда («ловить нож») без подтверждения разворота опасно: вероятность продолжения тренда выше.",
  horizon:"Горизонт удержания — сколько времени держите позицию. Для опциона критично: чем дольше держите, тем больше «съедает» временной распад (тета).",
- size:"Контракт — единица позиции; на ETH 1 контракт обычно = 1 ETH. Чем крупнее позиция, тем важнее жёсткий контроль риска.",
+ size:"Контракт — единица позиции. Чем крупнее позиция, тем важнее жёсткий контроль риска.",
  leverage:"Плечо — во сколько раз позиция больше вложенных под неё средств. Высокое плечо ускоряет и прибыль, и убыток и приближает выбивание по стопу/ликвидации.",
  protection:"SL (стоп-лосс) — заявка, которая автоматически закроет позицию при заданном убытке. Хедж — страховка противоположным опционом: он дорожает, когда основная позиция уходит в минус.",
  hedge_strike:"Страйк — цена исполнения опциона. Для защиты лонга берут PUT (право продать — страховка от падения), для защиты шорта — CALL. OTM — страйк, ещё не «в деньгах».",
@@ -261,7 +259,7 @@ var TERMS={
  trigger:"Триггер — конкретное событие-разрешение на вход именно сейчас (например, закрытие часовой свечи за уровнем), а не общее «скоро пойдёт».",
  cancel:"Уровень отмены — цена, где идея считается ошибочной. Сюда ставится стоп-лосс. RR (risk/reward) = ожидаемая доходность ÷ риск до этого уровня; ориентир — минимум 1:2.",
  atr:"ATR (Average True Range) — средний размах цены за период (здесь за 1 час), мера «шума» рынка. Стоп ставят на 1.5–2.0 ATR от входа: ближе — выбьет случайным колебанием, дальше — слишком большой риск.",
- iv:"ATM IV — подразумеваемая волатильность у текущей цены (% годовых), ожидание рынком будущего размаха. Высокая IV = дорогие опционы и быстрый временной распад. Отсюда же оценка среднедневного хода: ADR% ≈ IV ÷ √252.",
+ iv:"ATM IV — подразумеваемая волатильность у текущей цены (% годовых), ожидание рынком будущего размаха. Высокая IV = дорогие опционы и быстрый временной распад. Отсюда же оценка среднедневного хода: ADR% ≈ IV ÷ √252. Значение IV можно посмотреть в доске опционов для выбранного срока экспирации.",
  deposit:"Депозит — капитал, от которого считается риск. Нужен, чтобы проверить, не превышает ли риск сделки допустимую долю счёта.",
  riskmode:"Риск на сделку — сколько вы готовы потерять, если сделка не пойдёт. Профессиональная норма — 1–2% депозита на одну сделку.",
  riskpct:"Доля депозита под риск в одной сделке. 1–2% — консервативно, выше 5% — агрессивно.",
@@ -292,6 +290,11 @@ function optionZone(){var mp=movePct(),h=answers.horizon;if(mp==null||!h)return 
  [{name:"Дальний OTM",dte:"120+",delta:"0.12–0.18",raw:"1.5–1.6",theta:"1.3–1.5"},{name:"Средний–дальний",dte:"60–120",delta:"~0.2",raw:"1.3–1.5",theta:"1.1–1.3"},{name:"Средний срок",dte:"30–60",delta:"0.25–0.4",raw:"1.4–1.8",theta:"1.2–1.4"}]];
  var z=Object.assign({},M[row][col]);z.side=direction()==="long"?"CALL":"PUT";return z}
 
+function preferOpt(){var mp=movePct();var bigMove=mp!=null&&mp>=5;var highLev=answers.leverage==="x20 и выше";var fastConf=(answers.horizon==="Внутри дня"||answers.horizon==="1–2 дня")&&answers.confidence==="Высокая";return bigMove||highLev||fastConf;}
+function chosenIsOption(){return answers.instrument==="Опцион"||(answers.instrument==="Без разницы"&&preferOpt());}
+function pickVal(str,t,isDelta){var m=String(str).match(/(\d*\.?\d+)\s*[\u2013-]\s*(\d*\.?\d+)/);if(m){var lo=parseFloat(m[1]),hi=parseFloat(m[2]),v=lo+t*(hi-lo);return isDelta?v.toFixed(2):String(Math.round(v));}if(/\+/.test(String(str)))return String(str);var s1=String(str).match(/(\d*\.?\d+)/);if(s1){var x=parseFloat(s1[1]);return isDelta?x.toFixed(2):String(Math.round(x));}return String(str);}
+function ivConcrete(z){var iv=num(answers.iv);if(iv==null||!z)return "";var t=iv<45?0:(iv>65?1:0.5);var parts=[];if(!/\+/.test(String(z.dte)))parts.push("DTE "+pickVal(z.dte,t,false));parts.push("дельта "+pickVal(z.delta,t,true));return " (с учётом IV "+fmt(iv,0)+"%: "+parts.join(", ")+")";}
+function ivNote(){var iv=num(answers.iv);if(iv==null)return "";if(iv<45)return "IV низкая ("+fmt(iv,0)+"%): берите ближе к нижней границе дельты (дальше OTM) и более короткий срок из диапазона.";if(iv>65)return "IV высокая ("+fmt(iv,0)+"%): берите ближе к верхней границе дельты (ближе к деньгам) и более длинный срок из диапазона.";return "IV умеренная ("+fmt(iv,0)+"%): подойдёт середина диапазона по сроку и дельте.";}
 function compute(){
   var stops=[],warns=[],info=[],kv=[],calc=[];
   var d=direction(),mp=movePct(),adr=adrPct(),atr=num(answers.atr);
@@ -305,16 +308,18 @@ function compute(){
   if(sizeIsOverOne() && answers.protection==="Ничего" && answers.instrument!=="Опцион") stops.push(REC.nosl);
   if(cancelSideBad()) stops.push(REC.cancelside);
   if(answers.trend==="Не знаю") warns.push(REC.trendunk);
+  if(answers.confidence==="Низкая") warns.push(REC.lowconf);
 
   if(d) kv.push(["Направление", d==="long"?"Лонг (рост)":"Шорт (падение)"]);
   if(mp!=null) kv.push(["Ожидаемое движение", fmt(mp,2)+"%  ("+fmt(Math.abs(t-p),1)+" USDT)"]);
+  if(t!=null) kv.push(["Целевой уровень", fmt(t,1)+" USDT"]);
   if(adr!=null) kv.push(["Среднедневное (из IV)","≈ "+fmt(adr,2)+"%"]);
-  if(mp!=null&&adr!=null){ if(mp<adr) warns.push(REC.belowadr+" (движение "+fmt(mp,1)+"% < ADR "+fmt(adr,1)+"%)."); if(adr>3) info.push("Дневной диапазон ≈ "+fmt(adr,1)+"% (>3%): вероятность пройти 3% за день высокая."); }
+  if(mp!=null&&adr!=null){ if(mp<adr) warns.push(REC.belowadr+" (движение "+fmt(mp,1)+"% < ADR "+fmt(adr,1)+"%)."); if(adr>3) info.push("Дневной диапазон ≈ "+fmt(adr,1)+"%: вероятность пройти 3% за день высокая."); }
 
   var bigMove=mp!=null&&mp>=5, smallMove=mp!=null&&mp<3;
   var highLev=answers.leverage==="x20 и выше";
   var fastConf=(answers.horizon==="Внутри дня"||answers.horizon==="1–2 дня")&&answers.confidence==="Высокая";
-  var preferOption=bigMove||highLev||fastConf, userInstr=answers.instrument;
+  var preferOption=preferOpt(), userInstr=answers.instrument;
   var chosen=userInstr==="Опцион"?"option":(userInstr==="Фьючерс"?"futures":(preferOption?"option":"futures"));
 
   if(smallMove&&chosen==="futures"&&answers.horizon&&answers.horizon!=="Внутри дня") warns.push(REC.smallfut);
@@ -333,8 +338,10 @@ function compute(){
     var z=optionZone();
     var reason=bigMove?"крупное ожидаемое движение":(highLev?"высокое плечо неэффективно на фьючерсе":(fastConf?"уверенный короткий горизонт":"выбран опцион"));
     rec.lines.push("Инструмент: опцион (directional). Причина: "+reason+".");
+    info.push(REC.optadv);
     if(z){
-      rec.lines.push("Сторона: "+z.side+" (по направлению рынка). Зона: "+z.name+", DTE "+z.dte+", дельта "+z.delta+".");
+      rec.lines.push("Сторона: "+z.side+" (по направлению рынка). Зона: "+z.name+", DTE "+z.dte+", дельта "+z.delta+ivConcrete(z)+".");
+      var ivn=ivNote();if(ivn) rec.lines.push(ivn);
       kv.push(["Опцион",z.side+" · DTE "+z.dte+" · Δ "+z.delta]);
       kv.push(["Ожидаемый RR (сырой)","≈ "+z.raw]);
       kv.push(["Ожидаемый RR (с тетой)","≈ "+z.theta]);
@@ -348,9 +355,9 @@ function compute(){
       info.push("Безубыток опциона указан на дату экспирации; до неё опцион может выйти в плюс раньше за счёт временной стоимости.");
       calc.push("Безубыток опциона: "+ob.side+" со страйком "+fmt(num(answers.opt_strike),0)+" и премией "+fmt(num(answers.opt_prem),1)+" окупается при споте "+fmt(ob.be,1)+" (спот должен "+ob.dir+" на "+fmt(ob.need,1)+" USDT ≈ "+fmt(ob.pct,1)+"%).");
       if(t!=null&&ob.need!=null&&Math.abs(t-p)<ob.need) warns.push("Ваша цель не доходит до безубытка опциона при экспирации — прибыль возможна только раньше за счёт временной стоимости. Пересмотрите страйк или цель.");
-    } else if(userInstr==="Опцион"){ warns.push("Укажите страйк и премию опциона — без них не посчитать безубыток по движению спота."); }
-    var iv=num(answers.iv);
-    if(iv!=null){ if(iv<45) info.push("IV низкая ("+fmt(iv,0)+"%) — можно брать короче и дальше OTM, тета дешёвая."); else if(iv>65) info.push("IV высокая ("+fmt(iv,0)+"%) — смещайтесь к более длинному сроку и ближе к деньгам."); }
+    } else { warns.push("Укажите страйк и премию опциона — без них не посчитать безубыток по движению спота."); }
+    var prem=num(answers.opt_prem),rcO=repContracts();
+    if(prem!=null&&rcO!=null){var maxloss=prem*rcO;kv.push(["Макс. убыток (премия)","≈ "+fmt(maxloss,1)+" USDT ("+rcO+" контр.)"]);if(budget!=null){kv.push(["Риск-бюджет","≈ "+fmt(budget,1)+" USDT"]);if(maxloss>budget){var mc=fmt(budget/prem,2);calc.push("Превышение риска: премия "+fmt(prem,1)+" × "+rcO+" контр. = "+fmt(maxloss,1)+" USDT > бюджета "+fmt(budget,1)+" USDT. Уменьшите размер до "+mc+" контр. либо расширьте бюджет.");warns.push("Объём опциона превышает риск-бюджет — см. расчёт.");}else info.push("Объём опциона в пределах риск-бюджета.");}}
   } else {
     rec.lines.push("Инструмент: фьючерс.");
     var prot=answers.protection, forceHedge=preferOption&&userInstr==="Фьючерс";
@@ -358,6 +365,7 @@ function compute(){
     if(prot==="Хеджирую опционом"||forceHedge){
       var hside=d==="long"?"PUT":"CALL", hdte=(answers.horizon==="Более 3 дней")?"60+":"15–30";
       rec.lines.push("Хедж: защитный "+hside+", страйк у денег или чуть OTM, DTE "+hdte+" (≥ горизонт + запас).");
+      var spp=num(answers.price),kk=num(answers.hedge_strike);if(spp!=null&&kk!=null){if(d==="long"&&kk>spp)warns.push("Для лонга защитный опцион — PUT со страйком у денег или ниже. Указанный страйк выше цены — проверьте, что выбран PUT.");if(d==="short"&&kk<spp)warns.push("Для шорта защитный опцион — CALL со страйком у денег или выше. Указанный страйк ниже цены — проверьте, что выбран CALL.");}
       var hb=hedgeBE();
       if(hb){
         kv.push(["Хедж: безубыток по споту", fmt(hb.be,1)+" USDT"]);
@@ -389,7 +397,7 @@ function compute(){
           var implied=riskDist*rc;
           kv.push(["Риск-бюджет","≈ "+fmt(budget,1)+" USDT"]);
           kv.push(["Риск позиции","≈ "+fmt(implied,1)+" USDT ("+rc+" контр.)"]);
-          if(implied>budget){ var maxc=Math.floor(budget/riskDist); calc.push("Превышение риска: риск до стопа "+fmt(riskDist,1)+" × "+rc+" контр. = "+fmt(implied,1)+" USDT > бюджета "+fmt(budget,1)+" USDT. Уменьшите размер до "+maxc+" контр. либо расширьте бюджет."); warns.push("Риск позиции превышает бюджет — см. расчёт."); }
+          if(implied>budget){ var maxc=fmt(budget/riskDist,2); calc.push("Превышение риска: риск до стопа "+fmt(riskDist,1)+" × "+rc+" контр. = "+fmt(implied,1)+" USDT > бюджета "+fmt(budget,1)+" USDT. Уменьшите размер до "+maxc+" контр. либо расширьте бюджет."); warns.push("Риск позиции превышает бюджет — см. расчёт."); }
           else info.push("Риск позиции в пределах бюджета.");
         }
       } else if(!cancelSideBad()){ warns.push("Не заданы цена / цель / уровень отмены — не могу рассчитать RR и стоп."); }
@@ -399,14 +407,14 @@ function compute(){
   var verdict=stops.length?"no":(warns.length?"caution":"go");
   var head=verdict==="no"?REC.no:(verdict==="caution"?REC.caution:REC.go);
   return {verdict:verdict,head:head,stops:stops,warns:warns,info:info,kv:kv,calc:calc,rec:rec,
-    checklist:["SL или хедж фактически выставлен в терминале","Размер позиции в пределах риск-бюджета","Уровень отмены сделки стоит в стакане","Вход не против тренда без подтверждения","Новости на горизонт сделки проверены"]};
+    checklist:["SL или хедж фактически выставлен в терминале","Размер позиции в пределах риск-бюджета","Цель и уровень отмены обоснованы графиком, а не подогнаны под желаемый RR","Вход не против тренда без подтверждения","Новости на горизонт сделки проверены"]};
 }
 
 function visible(q){
   if(q.hideIfOption && answers.instrument==="Опцион")return false;
   if(q.dependsCounterTrend && !isCounterTrend())return false;
   if(q.dependsHedge && answers.protection!=="Хеджирую опционом")return false;
-  if(q.dependsOption && answers.instrument!=="Опцион")return false;
+  if(q.dependsOption && !chosenIsOption())return false;
   if(q.dependsRisk && answers.riskmode!==q.dependsRisk)return false;
   return true;
 }
@@ -467,11 +475,11 @@ function renderInput(q){
     var sel=q.type==="multi"?((answers[q.key]||[]).indexOf(o)>=0):(answers[q.key]===o);
     var btn=el("button","opt"+(sel?" sel":""),o);
     btn.onclick=function(){
-      if(q.type==="multi"){var arr=answers[q.key]||[];var i=arr.indexOf(o);if(i>=0)arr.splice(i,1);else arr.push(o);answers[q.key]=arr;}
-      else answers[q.key]=o;
-      $("#nudge").classList.add("hidden");
-      [].forEach.call(opts.children,function(x){var s=q.type==="multi"?((answers[q.key]||[]).indexOf(x.textContent)>=0):(answers[q.key]===x.textContent);x.classList.toggle("sel",s)});
-      updateLive();
+      if(q.type==="multi"){var arr=answers[q.key]||[];var i=arr.indexOf(o);if(i>=0)arr.splice(i,1);else arr.push(o);answers[q.key]=arr;
+        $("#nudge").classList.add("hidden");
+        [].forEach.call(opts.children,function(x){x.classList.toggle("sel",(answers[q.key]||[]).indexOf(x.textContent)>=0)});
+        updateLive();
+      } else { answers[q.key]=o; $("#nudge").classList.add("hidden"); render(); }
     };
     opts.appendChild(btn);
   });
@@ -488,12 +496,14 @@ function liveCallout(q){
     case "trend": if(answers.trend==="Не знаю")return co("warn","Тренд не определён — вход рискован: непонятно, не идёте ли против рынка. Сначала определите направление.");if(isCounterTrend())return co("warn","Направление сделки против тренда. Дальше уточним, есть ли подтверждение разворота.");break;
     case "reversal": if(answers.reversal==="Нет")return co("stop","Контртренд без подтверждения — «ловля ножей». Дождитесь подтверждения смены тренда или откажитесь.");if(answers.reversal==="Да, есть подтверждение")return co("warn","Контртренд с подтверждением — допустимо, но риск повышен: размер ниже обычного.");break;
     case "trigger": if(answers.trigger==="Чёткого триггера пока нет")return co("stop","Нет конкретного триггера — вход преждевременный. Дождитесь сигнала.");break;
-    case "horizon": if(mp!=null&&mp<3&&answers.instrument!=="Опцион"&&answers.horizon&&answers.horizon!=="Внутри дня")return co("warn","Малое движение (<3%) и удержание дольше 1 дня на фьючерсе — невыгодно. Сократите горизонт или рассмотрите опцион.");break;
-    case "size": if(sizeIsOverOne())return co("info","Позиция больше 1 контракта — защита (SL или хедж) будет обязательной.");break;
+    case "horizon": if(mp!=null&&mp<3&&answers.instrument!=="Опцион"&&answers.horizon&&answers.horizon!=="Внутри дня")return co("warn","Малое движение (<3%) и удержание дольше 1 дня на фьючерсе — невыгодно: цель в пределах дневного хода, а лишнее время лишь добавляет риск разворота и издержки фандинга. Сократите горизонт или рассмотрите опцион.");break;
+    case "size": if(sizeIsOverOne()&&answers.instrument!=="Опцион")return co("info","Позиция больше 1 контракта — защита (SL или хедж) будет обязательной.");break;
     case "leverage": if(answers.leverage==="x20 и выше")return co("info","Высокое плечо: короткий стоп выбьет на шуме. Часто эффективнее опцион вместо фьючерса.");break;
     case "protection": if(sizeIsOverOne()&&answers.protection==="Ничего")return co("stop","Размер больше 1 контракта без защиты — такую сделку не открываем.");if(answers.protection==="Хеджирую опционом")return co("info","Дальше укажите страйк и премию опциона — посчитаю безубыток хеджа по движению спота.");break;
     case "cancel": if(cancelSideBad())return co("stop","Уровень отмены не с той стороны: для лонга он ниже входа, для шорта — выше.");if(d&&num(answers.cancel)!=null&&num(answers.price)!=null){var rdv=Math.abs(num(answers.price)-num(answers.cancel));var ex="Риск до стопа ≈ "+fmt(rdv,1)+" USDT/контр.";var at=num(answers.atr);if(at)ex+=" ("+fmt(rdv/at,2)+" ATR)";return co("info",ex);}break;
+    case "hedge_strike": var dd=direction();if(dd){var hs=dd==="long"?"PUT":"CALL";var hd=answers.horizon==="Более 3 дней"?"60+":"15–30";var sp=num(answers.price),kk2=num(answers.hedge_strike),ww="";if(sp!=null&&kk2!=null){if(dd==="long"&&kk2>sp)ww=" Внимание: для лонга хедж — PUT со страйком у денег или ниже; страйк выше цены не подходит.";if(dd==="short"&&kk2<sp)ww=" Внимание: для шорта хедж — CALL со страйком у денег или выше; страйк ниже цены не подходит.";}return co(ww?"warn":"info","Рекомендуемый хедж: "+hs+", страйк у денег или чуть OTM, DTE "+hd+" (≥ горизонт + запас)."+ww);}break;
     case "hedge_prem": var hb=hedgeBE();if(hb)return co("info","Безубыток хеджа: спот "+fmt(hb.be,1)+" (должен "+hb.dir+" на "+fmt(hb.need,1)+" USDT ≈ "+fmt(hb.pct,1)+"%). "+(hb.floor<0?"Защищённый макс. убыток ≈ "+fmt(-hb.floor,1)+" USDT/контр.":"Позиция захеджирована в плюс, мин. ≈ +"+fmt(hb.floor,1)+" USDT/контр."));break;
+    case "opt_strike": var oz=optionZone();if(oz){var iN=ivNote();return co("info","Рекомендуемые параметры для выбора опциона: "+oz.side+", "+oz.name+", DTE "+oz.dte+", дельта "+oz.delta+ivConcrete(oz)+"."+(iN?" "+iN:""));}break;
     case "opt_prem": var ob=optBE();if(ob)return co("info","Безубыток опциона: спот "+fmt(ob.be,1)+" (должен "+ob.dir+" на "+fmt(ob.need,1)+" USDT ≈ "+fmt(ob.pct,1)+"%). На экспирации; до неё возможен плюс раньше за счёт временной стоимости.");break;
     case "iv": if(adr!=null){var m="Среднедневное движение ≈ "+fmt(adr,2)+"% (IV ÷ √252).";if(mp!=null&&mp<adr)return co("warn",m+" Ваша цель ("+fmt(mp,1)+"%) меньше дневного шума — на фьючерсе край слабый.");return co("info",m);}break;
   }
@@ -522,7 +532,7 @@ function renderResult(){
   return frag;
 }
 function nextNum(){var n=parseInt(dbGet(KN)||"0",10)+1;dbSet(KN,String(n));return n}
-function saveSurvey(r){var list=loadSurveys(),now=new Date();var rec={num:nextNum(),savedAt:now.toLocaleString("ru-RU"),iso:now.toISOString(),verdict:r.verdict,answers:JSON.parse(JSON.stringify(answers)),summary:r.rec.lines.slice(),kv:r.kv.slice()};list.unshift(rec);dbSet(KS,JSON.stringify(list));alert("Сохранено как опрос №"+rec.num+" ("+rec.savedAt+")");setView("saved")}
+function saveSurvey(r){var list=loadSurveys(),now=new Date();var rec={num:nextNum(),savedAt:now.toLocaleString("ru-RU"),iso:now.toISOString(),verdict:r.verdict,answers:JSON.parse(JSON.stringify(answers)),summary:r.rec.lines.slice(),kv:r.kv.slice()};list.unshift(rec);dbSet(KS,JSON.stringify(list));alert("Сохранено как опрос №"+rec.num+" ("+rec.savedAt+")");answers={};stepKey=null;setView("form")}
 
 function renderSaved(){
   var frag=document.createDocumentFragment();
