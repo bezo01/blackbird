@@ -160,6 +160,7 @@ input:focus,.opt:focus-visible,button:focus-visible{outline:2px solid var(--sel)
 var MEM={}, LS_OK=(function(){try{localStorage.setItem("__bb","1");localStorage.removeItem("__bb");return true}catch(e){return false}})();
 function dbGet(k){try{return LS_OK?localStorage.getItem(k):MEM[k]}catch(e){return MEM[k]}}
 function dbSet(k,v){try{LS_OK?localStorage.setItem(k,v):MEM[k]=v}catch(e){MEM[k]=v}}
+var VERSION="v7 · 19.06.2026";
 var KQ="bb_questions_v3", KS="bb_surveys_v3", KR="bb_rectexts_v3", KN="bb_counter_v3";
 
 var DEFAULT_QUESTIONS=[
@@ -314,13 +315,14 @@ function compute(){
   if(mp!=null) kv.push(["Ожидаемое движение", fmt(mp,2)+"%  ("+fmt(Math.abs(t-p),1)+" USDT)"]);
   if(t!=null) kv.push(["Целевой уровень", fmt(t,1)+" USDT"]);
   if(adr!=null) kv.push(["Среднедневное (из IV)","≈ "+fmt(adr,2)+"%"]);
-  if(mp!=null&&adr!=null){ if(mp<adr) warns.push(REC.belowadr+" (движение "+fmt(mp,1)+"% < ADR "+fmt(adr,1)+"%)."); if(adr>3) info.push("Дневной диапазон ≈ "+fmt(adr,1)+"%: вероятность пройти 3% за день высокая."); }
+  if(adr!=null&&adr>3) info.push("Дневной диапазон ≈ "+fmt(adr,1)+"%: вероятность пройти 3% за день высокая.");
 
   var bigMove=mp!=null&&mp>=5, smallMove=mp!=null&&mp<3;
   var highLev=answers.leverage==="x20 и выше";
   var fastConf=(answers.horizon==="Внутри дня"||answers.horizon==="1–2 дня")&&answers.confidence==="Высокая";
   var preferOption=preferOpt(), userInstr=answers.instrument;
   var chosen=userInstr==="Опцион"?"option":(userInstr==="Фьючерс"?"futures":(preferOption?"option":"futures"));
+  if(mp!=null&&adr!=null&&mp<adr&&chosen==="futures") warns.push(REC.belowadr+" (движение "+fmt(mp,1)+"% < ADR "+fmt(adr,1)+"%).");
 
   if(smallMove&&chosen==="futures"&&answers.horizon&&answers.horizon!=="Внутри дня") warns.push(REC.smallfut);
   if(answers.news==="Проверен — есть крупное событие") warns.push(REC.news);
@@ -439,10 +441,11 @@ function renderWizard(){
   var frag=document.createDocumentFragment();
   var list=visibleList();if(!list.length)return frag;
   var q=currentQ();stepKey=q.key;var idx=list.indexOf(q);
+  var pendingRisk=answers.riskmode?0:1;var total=list.length+pendingRisk;
   var head=el("div","wizhead");
-  head.innerHTML='<span class="blk">'+BLOCKS[q.block]+'</span><a href="#" class="toplink" onclick="openCard();return false;">карта выбора опциона</a><a href="#" class="toplink" onclick="openInstall();return false;">как установить на iPhone</a><span class="cnt">шаг '+(idx+1)+' из '+list.length+'</span>';
+  head.innerHTML='<span class="blk">'+BLOCKS[q.block]+'</span><a href="#" class="toplink" onclick="openCard();return false;">карта выбора опциона</a><a href="#" class="toplink" onclick="openInstall();return false;">как установить на iPhone</a><span class="cnt">шаг '+(idx+1)+' из '+total+'</span>';
   frag.appendChild(head);
-  var prog=el("div","prog");prog.innerHTML='<i style="width:'+Math.round(idx/(list.length-1||1)*100)+'%"></i>';frag.appendChild(prog);
+  var prog=el("div","prog");prog.innerHTML='<i style="width:'+Math.round(idx/(total-1||1)*100)+'%"></i>';frag.appendChild(prog);
   var step=el("div","block step");
   step.appendChild(el("div","label",q.label+(q.optional?' <span style="color:var(--faint);font-weight:400">— необяз.</span>':"")));
   if(q.help)step.appendChild(el("div","help",q.help));
@@ -454,7 +457,7 @@ function renderWizard(){
   var act=el("div","actions");
   var back=el("button","btn ghost","Назад");back.disabled=idx===0;
   back.onclick=function(){if(idx>0){stepKey=list[idx-1].key;render();window.scrollTo(0,0)}};
-  var last=idx===list.length-1;
+  var last=(idx===list.length-1)&&pendingRisk===0;
   var next=el("button","btn primary",last?"Рассчитать рекомендацию":"Далее");
   next.onclick=function(){ if(!answered(q)){$("#nudge").classList.remove("hidden");return}
     var l2=visibleList();var ci=l2.filter(function(x){return x.key===q.key})[0];var i2=l2.indexOf(ci);
@@ -505,7 +508,7 @@ function liveCallout(q){
     case "hedge_prem": var hb=hedgeBE();if(hb)return co("info","Безубыток хеджа: спот "+fmt(hb.be,1)+" (должен "+hb.dir+" на "+fmt(hb.need,1)+" USDT ≈ "+fmt(hb.pct,1)+"%). "+(hb.floor<0?"Защищённый макс. убыток ≈ "+fmt(-hb.floor,1)+" USDT/контр.":"Позиция захеджирована в плюс, мин. ≈ +"+fmt(hb.floor,1)+" USDT/контр."));break;
     case "opt_strike": var oz=optionZone();if(oz){var iN=ivNote();return co("info","Рекомендуемые параметры для выбора опциона: "+oz.side+", "+oz.name+", DTE "+oz.dte+", дельта "+oz.delta+ivConcrete(oz)+"."+(iN?" "+iN:""));}break;
     case "opt_prem": var ob=optBE();if(ob)return co("info","Безубыток опциона: спот "+fmt(ob.be,1)+" (должен "+ob.dir+" на "+fmt(ob.need,1)+" USDT ≈ "+fmt(ob.pct,1)+"%). На экспирации; до неё возможен плюс раньше за счёт временной стоимости.");break;
-    case "iv": if(adr!=null){var m="Среднедневное движение ≈ "+fmt(adr,2)+"% (IV ÷ √252).";if(mp!=null&&mp<adr)return co("warn",m+" Ваша цель ("+fmt(mp,1)+"%) меньше дневного шума — на фьючерсе край слабый.");return co("info",m);}break;
+    case "iv": if(adr!=null){var m="Среднедневное движение ≈ "+fmt(adr,2)+"% (IV ÷ √252).";if(mp!=null&&mp<adr&&!chosenIsOption())return co("warn",m+" Ваша цель ("+fmt(mp,1)+"%) меньше дневного шума — на фьючерсе край слабый.");return co("info",m);}break;
   }
   return "";
 }
@@ -566,6 +569,7 @@ function renderSettings(){
   tools.appendChild(exp);tools.appendChild(imp);frag.appendChild(tools);
   var list=loadSurveys();
   frag.appendChild(el("div","note","Сейчас сохранено опросов: "+list.length+"."));
+  frag.appendChild(el("div","note","Версия приложения: "+VERSION));
   return frag;
 }
 function mkField(label,val,onsave,area){var w=el("div");w.appendChild(el("label",null,label));var inp=area?el("textarea"):el("input");if(!area)inp.type="text";inp.value=val;inp.onchange=function(){onsave(inp.value)};w.appendChild(inp);return w}
