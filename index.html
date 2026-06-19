@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1318">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Black Bird · Pre-Trade Questionnaire</title>
+<style>
+:root{
+  --bg:#0f1318; --bg2:#141b23; --card:#1a222d; --card2:#202a36; --line:#2a3543;
+  --txt:#e8eaef; --muted:#9aa3b2; --faint:#6b7480;
+  --accent:#e3a93c; --accent-d:#3a2f15; --sel:#54b7da; --sel-bg:#14303a;
+  --green:#43b581; --green-d:#16301f; --red:#e2574c; --red-d:#34191a; --amber:#e0a83e; --amber-d:#332a12;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;font-size:16px;overflow-x:hidden}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px calc(80px + env(safe-area-inset-bottom))}
+a{color:var(--sel)}
+button{font-family:var(--sans);cursor:pointer}
+
+header{position:sticky;top:0;z-index:20;background:rgba(15,19,24,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.hbar{max-width:760px;margin:0 auto;padding:11px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+.bird{width:28px;height:28px;flex:0 0 auto}
+.brand h1{font-size:16px;font-weight:600;margin:0;letter-spacing:.2px;white-space:nowrap}
+.brand .sub{font-size:10px;color:var(--faint);letter-spacing:1.4px;text-transform:uppercase}
+.nav{display:flex;gap:4px;flex-wrap:wrap}
+.nav button{background:transparent;border:1px solid transparent;color:var(--muted);padding:7px 10px;border-radius:9px;font-size:12.5px}
+.nav button.active{color:var(--txt);background:var(--card2);border-color:var(--line)}
+
+.banner{margin:14px 0 0;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--muted);font-size:13px;display:none}
+.banner.show{display:block}
+
+.block{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin:16px 0}
+.block-h{display:flex;align-items:baseline;gap:10px;margin:2px 0 4px}
+.block-h .idx{font-family:var(--mono);font-size:12px;color:var(--accent);border:1px solid var(--accent-d);background:var(--accent-d);padding:2px 7px;border-radius:6px}
+.block-h h2{font-size:15px;font-weight:600;margin:0;color:var(--txt)}
+
+.wizhead{display:flex;align-items:center;gap:10px;margin:18px 2px 8px;flex-wrap:wrap}
+.wizhead .blk{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px}
+.wizhead .cnt{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--faint)}
+.prog{height:4px;background:var(--line);border-radius:3px;overflow:hidden;margin:0 2px 4px}
+.prog>i{display:block;height:100%;background:var(--accent);transition:width .25s}
+
+.label{font-size:17px;font-weight:500;margin-bottom:4px}
+.help{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{border:1px solid var(--line);background:var(--card2);color:var(--txt);padding:14px 15px;border-radius:11px;font-size:15px;text-align:left;transition:.12s;min-height:48px}
+.opt:active{transform:scale(.99)}
+.opt.sel{border-color:var(--sel);background:var(--sel-bg);color:var(--sel)}
+input[type=number],input[type=text]{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--txt);padding:14px 15px;border-radius:11px;font-size:16px;font-family:var(--mono)}
+input:focus,.opt:focus-visible,button:focus-visible{outline:2px solid var(--sel);outline-offset:1px}
+.unit{font-family:var(--mono);color:var(--faint);font-size:12px;margin-top:6px}
+
+.term{margin:-2px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg2)}
+.term>summary{list-style:none;cursor:pointer;padding:11px 13px;font-size:13px;color:var(--sel);font-weight:500}
+.term>summary::-webkit-details-marker{display:none}
+.term>summary::before{content:"\24D8";margin-right:7px}
+.term[open]>summary{border-bottom:1px solid var(--line)}
+.term .tbody{padding:11px 13px;font-size:13px;color:var(--muted);line-height:1.55}
+.callout{margin-top:14px;border-radius:10px;padding:11px 13px;font-size:13.5px;line-height:1.5;border:1px solid}
+.callout.stop{background:var(--red-d);border-color:#5a2526;color:#f1b3ae}
+.callout.warn{background:var(--amber-d);border-color:#5a4a1c;color:#ecd29a}
+.callout.info{background:var(--sel-bg);border-color:#1f4655;color:#a9d8e6}
+.nudge{color:var(--amber);font-size:13px;margin-top:10px}
+
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn{border:1px solid var(--line);background:var(--card2);color:var(--txt);padding:13px 18px;border-radius:11px;font-size:14.5px;font-weight:500;min-height:48px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1407;font-weight:600}
+.btn.primary:active{filter:brightness(1.07)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--red);border-color:var(--red-d)}
+.btn:disabled{opacity:.45}
+
+.verdict{border-radius:var(--r);padding:18px;border:1px solid;display:flex;gap:14px;align-items:flex-start}
+.verdict .light{width:14px;height:14px;border-radius:50%;margin-top:5px;flex:0 0 auto}
+.verdict h2{margin:0 0 4px;font-size:18px}
+.verdict p{margin:0;font-size:13.5px;color:var(--muted)}
+.v-go{background:var(--green-d);border-color:#1f5238}.v-go .light{background:var(--green)}.v-go h2{color:var(--green)}
+.v-caution{background:var(--amber-d);border-color:#5a4a1c}.v-caution .light{background:var(--amber)}.v-caution h2{color:var(--amber)}
+.v-no{background:var(--red-d);border-color:#5a2526}.v-no .light{background:var(--red)}.v-no h2{color:var(--red)}
+
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-top:14px}
+.rcard h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--faint);font-weight:600}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.kv:first-of-type{border-top:none}
+.kv .k{color:var(--muted)}
+.kv .v{font-family:var(--mono);text-align:right;color:var(--txt)}
+.note{font-size:13px;color:var(--muted);line-height:1.55;margin:8px 0 0}
+.flag{display:flex;gap:9px;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px;line-height:1.5}
+.flag:first-child{border-top:none}
+.flag .dot{flex:0 0 auto;width:7px;height:7px;border-radius:50%;margin-top:6px}
+.flag.warn .dot{background:var(--amber)} .flag.stop .dot{background:var(--red)} .flag.info .dot{background:var(--sel)}
+.checklist .flag .dot{background:var(--faint)}
+
+.srow{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:10px}
+.srow .top{display:flex;align-items:center;gap:10px;cursor:pointer}
+.srow .num{font-family:var(--mono);color:var(--accent);font-size:13px}
+.srow .ts{font-family:var(--mono);color:var(--faint);font-size:12px;margin-left:auto}
+.pill{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600}
+.pill.go{background:var(--green-d);color:var(--green)}.pill.caution{background:var(--amber-d);color:var(--amber)}.pill.no{background:var(--red-d);color:var(--red)}
+.sdetail{display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.sdetail.open{display:block}
+.empty{text-align:center;color:var(--faint);padding:50px 20px;font-size:14px}
+
+.setq{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px;margin-bottom:10px}
+.setq .row1{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.setq .key{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.setq .mv{margin-left:auto;display:flex;gap:6px}
+.iconbtn{background:var(--card2);border:1px solid var(--line);color:var(--muted);width:34px;height:34px;border-radius:8px;font-size:15px;line-height:1}
+.setq label{font-size:12px;color:var(--faint);display:block;margin:8px 0 4px}
+.setq input,.setq textarea{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:9px 11px;font-size:16px;font-family:var(--sans)}
+.setq textarea{min-height:72px;resize:vertical}
+
+.modal{position:fixed;inset:0;background:rgba(8,11,15,.8);display:none;align-items:flex-start;justify-content:center;padding:calc(20px + env(safe-area-inset-top)) 12px 20px;z-index:50;overflow:auto;-webkit-overflow-scrolling:touch}
+.modal.open{display:flex}
+.modal-inner{background:var(--card);border:1px solid var(--line);border-radius:var(--r);max-width:720px;width:100%;padding:18px;max-height:90vh;overflow:auto}
+.modal-inner .mh{display:flex;align-items:center;margin-bottom:10px}
+.modal-inner h2{font-size:15px;margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.toplink{font-size:12.5px}
+@media (max-width:430px){.brand .sub{display:none}}
+@media (prefers-reduced-motion:no-preference){.view,.step{animation:f .2s ease}@keyframes f{from{opacity:0;transform:translateY(4px)}to{opacity:1}}}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <div class="brand">
+      <svg class="bird" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <path d="M8 40c10 4 18 2 24-4 3 8 10 12 22 11-6 5-13 7-21 6 2 5 7 8 14 9-10 4-20 1-27-7-5 5-11 7-18 6 4-3 8-7 10-12-7-2-12-7-13-14 6 5 12 7 18 6-7-3-12-9-13-18 8 7 16 11 24 12-3-4-4-9-3-15 7 9 14 14 21 16-7 5-15 5-24 1 .3 4 2 7 5 10-9 1-16-2-21-9z" fill="#e3a93c"/>
+      </svg>
+      <div><h1>Black Bird</h1><div class="sub">Pre-Trade Questionnaire</div></div>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-view="form" class="active">Опрос</button>
+      <button data-view="saved">Сохранённые</button>
+      <button data-view="card">Карта</button>
+      <button data-view="settings">Настройки</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="banner" id="banner"></div>
+  <div id="app"></div>
+</div>
+
+<div class="modal" id="modal"><div class="modal-inner" id="modalInner"></div></div>
+
+<script>
+"use strict";
+var MEM={}, LS_OK=(function(){try{localStorage.setItem("__bb","1");localStorage.removeItem("__bb");return true}catch(e){return false}})();
+function dbGet(k){try{return LS_OK?localStorage.getItem(k):MEM[k]}catch(e){return MEM[k]}}
+function dbSet(k,v){try{LS_OK?localStorage.setItem(k,v):MEM[k]=v}catch(e){MEM[k]=v}}
+var KQ="bb_questions_v3", KS="bb_surveys_v3", KR="bb_rectexts_v3", KN="bb_counter_v3";
+
+var DEFAULT_QUESTIONS=[
+ {key:"emotion",block:0,type:"single",label:"Ваше состояние сейчас",
+  help:"Дисциплина начинается здесь. Вход на эмоциях статистически худший по матожиданию.",
+  options:["Спокоен, действую по плану","На эмоциях (отыгрыш, FOMO, усталость, спешка)"]},
+ {key:"news",block:0,type:"single",label:"Календарь новостей на горизонт сделки",
+  help:"Крупные события (CPI, FOMC, листинги) дают всплески волатильности и гэпы.",
+  options:["Проверен — крупных событий нет","Проверен — есть крупное событие","Не проверял"]},
+
+ {key:"instrument",block:1,type:"single",label:"Чем планируете торговать",help:"",
+  options:["Фьючерс","Опцион","Без разницы"]},
+ {key:"price",block:1,type:"number",label:"Текущая цена базового актива, USDT",help:"",unit:"USDT"},
+ {key:"target",block:1,type:"number",label:"Целевой уровень — куда ждёте цену, USDT",
+  help:"Направление и ожидаемое движение в % посчитаются автоматически.",unit:"USDT"},
+ {key:"trend",block:1,type:"single",label:"Тренд на рынке сейчас",
+  help:"Вход против тренда без подтверждения разворота — высокорискован.",
+  options:["Восходящий","Нисходящий","Боковик","Не знаю"]},
+ {key:"reversal",block:1,type:"single",label:"Есть ли подтверждение разворота тренда?",
+  help:"Этот вопрос появился, потому что направление сделки противоположно тренду.",
+  options:["Да, есть подтверждение","Нет"],dependsCounterTrend:true},
+ {key:"horizon",block:1,type:"single",label:"Горизонт удержания позиции",help:"",
+  options:["Внутри дня","1–2 дня","2–3 дня","Более 3 дней"]},
+ {key:"size",block:1,type:"single",label:"Размер позиции",
+  help:"До 1 — небольшая, более 1 и до 3 — умеренная, более 3 и до 5 — средняя, более 5 — большая.",
+  options:["До 1 контракта","Более 1 и до 3","Более 3 и до 5","Более 5"]},
+ {key:"contracts",block:1,type:"number",label:"Точное число контрактов (необязательно)",
+  help:"Если укажете — риск в USDT посчитается точнее.",unit:"контрактов",optional:true},
+ {key:"leverage",block:1,type:"single",label:"Планируемое плечо (для фьючерса)",
+  help:"При высоком плече короткий стоп выбивает на шуме.",
+  options:["До x5","x5–10","x10–20","x20 и выше"],hideIfOption:true},
+ {key:"protection",block:1,type:"single",label:"План защиты позиции",
+  help:"Более 1 контракта без защиты не открываем.",
+  options:["Ставлю SL","Хеджирую опционом","Ничего"],hideIfOption:true},
+ {key:"hedge_strike",block:1,type:"number",label:"Страйк хедж-опциона, USDT",
+  help:"Защитный опцион противоположной стороны: под лонг — PUT, под шорт — CALL.",unit:"USDT",dependsHedge:true},
+ {key:"hedge_prem",block:1,type:"number",label:"Премия хедж-опциона (markPrice), USDT",
+  help:"Текущая рыночная цена опциона. По ней считается безубыток хеджа по споту.",unit:"USDT",dependsHedge:true},
+ {key:"opt_strike",block:1,type:"number",label:"Страйк опциона, USDT",
+  help:"Для расчёта безубытка опциона по движению спота.",unit:"USDT",dependsOption:true},
+ {key:"opt_prem",block:1,type:"number",label:"Премия опциона (markPrice), USDT",
+  help:"Текущая рыночная цена опциона.",unit:"USDT",dependsOption:true},
+
+ {key:"basis",block:2,type:"multi",label:"Основание входа (можно несколько)",help:"",
+  options:["Уровень / структура","Пробой","Индикатор-сигнал","Новостной катализатор","Интуиция"]},
+ {key:"trigger",block:2,type:"single",label:"Конкретный триггер прямо сейчас",
+  help:"Что именно даёт вход в этот момент, а не «вообще скоро».",
+  options:["Пробой уровня с объёмом","Ретест уровня / ложный пробой","Сработал сигнал индикатора","Вышла новость","Паттерн завершился","Чёткого триггера пока нет"]},
+ {key:"cancel",block:2,type:"number",label:"Уровень отмены сделки, USDT",
+  help:"Цена, при которой признаём ошибку и выходим. На этот уровень ставится стоп-лосс, и от него считается RR. Для лонга он ниже входа, для шорта — выше.",unit:"USDT"},
+ {key:"confidence",block:2,type:"single",label:"Уверенность в выбранном горизонте удержания",help:"",
+  options:["Низкая","Средняя","Высокая"]},
+
+ {key:"atr",block:3,type:"number",label:"ATR(1H), USDT",help:"Для сверки уровня отмены с волатильностью (норма стопа 1.5–2.0 ATR).",unit:"USDT"},
+ {key:"iv",block:3,type:"number",label:"ATM IV, % (годовая)",
+  help:"Управляет выбором срока опциона. Из неё же оценивается среднедневное движение: ADR% ≈ IV ÷ √252.",unit:"%"},
+ {key:"deposit",block:3,type:"number",label:"Размер депозита, USDT",
+  help:"Нужен, чтобы перепроверить, не превышает ли риск ваш бюджет.",unit:"USDT"},
+ {key:"riskmode",block:3,type:"single",label:"Бюджет риска на сделку задаём в",help:"",
+  options:["% от депозита","USDT"]},
+ {key:"riskpct",block:3,type:"number",label:"Риск на сделку, % от депозита",help:"",unit:"%",dependsRisk:"% от депозита"},
+ {key:"riskusd",block:3,type:"number",label:"Риск на сделку, USDT",help:"",unit:"USDT",dependsRisk:"USDT"}
+];
+var BLOCKS=["Готовность","Структура сделки","Качество тезиса","Риск и расчёт"];
+
+var DEFAULT_REC={
+ go:"Структура сделки целостна. Можно работать по плану.",
+ caution:"Сделку можно рассмотреть, но есть моменты, которые лучше поправить до входа.",
+ no:"Лучше не входить — не выполнены базовые условия структуры или риска.",
+ emotion:"Вход на эмоциях. Переждите, вернитесь к плану на холодную голову.",
+ cancel:"Не задан уровень отмены сделки. Без него нет риск-границы — сделки нет.",
+ nomove:"Цель равна текущей цене: нет ожидания движения. Уточните цель.",
+ notrigger:"Нет конкретного триггера — вход преждевременный. Дождитесь сигнала.",
+ counter:"Контртрендовый вход без подтверждения разворота — «ловля ножей». Дождитесь подтверждения смены тренда или откажитесь.",
+ nosl:"Позиция больше 1 контракта без SL и без хеджа. Защита обязательна.",
+ rrlow:"Ожидаемый RR ниже целевого 1:2. Варианты: поднять цель по доходности; перенести уровень отмены ближе (риск раннего выбивания); не входить; либо частичный хедж опционом.",
+ smallfut:"На малое движение (<3%) не закладывайте удержание фьючерса дольше 1 дня.",
+ belowadr:"Ожидаемое движение меньше среднедневного — это в пределах дневного шума, край слабый. На фьючерсе лучше не открывать.",
+ news:"На горизонт сделки есть крупное событие. Гэп-риск повышен: переждите выход новости или уменьшите размер.",
+ trendunk:"Тренд не определён — вход рискован: вы не знаете, не идёт ли сделка против тренда. Сначала определите направление рынка.",
+ cancelside:"Уровень отмены стоит не с той стороны от входа (для лонга он должен быть ниже цены, для шорта — выше). Проверьте."
+};
+
+var TERMS={
+ instrument:"Фьючерс — ставка на движение цены с плечом, прибыль и убыток растут симметрично. Опцион — право (не обязанность) купить/продать по фиксированной цене; в сторону движения работает как фьючерс с плечом, против — теряет медленнее, но платит «за время».",
+ price:"Базовый актив — то, на чём вы зарабатываете (здесь ETH). Текущая цена — отправная точка всех расчётов.",
+ target:"Целевой уровень — цена, до которой вы ждёте движение. Разница с текущей ценой — это ваша ожидаемая доходность по сделке.",
+ trend:"Тренд — преобладающее направление цены. Входить против тренда («ловить нож») без подтверждения разворота опасно: вероятность продолжения тренда выше.",
+ horizon:"Горизонт удержания — сколько времени держите позицию. Для опциона критично: чем дольше держите, тем больше «съедает» временной распад (тета).",
+ size:"Контракт — единица позиции; на ETH 1 контракт обычно = 1 ETH. Чем крупнее позиция, тем важнее жёсткий контроль риска.",
+ leverage:"Плечо — во сколько раз позиция больше вложенных под неё средств. Высокое плечо ускоряет и прибыль, и убыток и приближает выбивание по стопу/ликвидации.",
+ protection:"SL (стоп-лосс) — заявка, которая автоматически закроет позицию при заданном убытке. Хедж — страховка противоположным опционом: он дорожает, когда основная позиция уходит в минус.",
+ hedge_strike:"Страйк — цена исполнения опциона. Для защиты лонга берут PUT (право продать — страховка от падения), для защиты шорта — CALL. OTM — страйк, ещё не «в деньгах».",
+ hedge_prem:"Премия (markPrice) — текущая цена опциона, то есть стоимость страховки. Из страйка и премии считается, насколько должен пройти спот, чтобы хедж окупился.",
+ opt_strike:"Страйк — цена исполнения опциона. Дельта показывает чувствительность опциона к движению цены; чем дальше страйк (OTM), тем меньше дельта и дешевле опцион.",
+ opt_prem:"Премия (markPrice) — сколько стоит купить опцион. Безубыток: для колла спот должен подняться до страйк + премия, для пута — опуститься до страйк − премия.",
+ trigger:"Триггер — конкретное событие-разрешение на вход именно сейчас (например, закрытие часовой свечи за уровнем), а не общее «скоро пойдёт».",
+ cancel:"Уровень отмены — цена, где идея считается ошибочной. Сюда ставится стоп-лосс. RR (risk/reward) = ожидаемая доходность ÷ риск до этого уровня; ориентир — минимум 1:2.",
+ atr:"ATR (Average True Range) — средний размах цены за период (здесь за 1 час), мера «шума» рынка. Стоп ставят на 1.5–2.0 ATR от входа: ближе — выбьет случайным колебанием, дальше — слишком большой риск.",
+ iv:"ATM IV — подразумеваемая волатильность у текущей цены (% годовых), ожидание рынком будущего размаха. Высокая IV = дорогие опционы и быстрый временной распад. Отсюда же оценка среднедневного хода: ADR% ≈ IV ÷ √252.",
+ deposit:"Депозит — капитал, от которого считается риск. Нужен, чтобы проверить, не превышает ли риск сделки допустимую долю счёта.",
+ riskmode:"Риск на сделку — сколько вы готовы потерять, если сделка не пойдёт. Профессиональная норма — 1–2% депозита на одну сделку.",
+ riskpct:"Доля депозита под риск в одной сделке. 1–2% — консервативно, выше 5% — агрессивно.",
+ riskusd:"Сумма в USDT, которой вы рискуете в этой сделке (равна расстоянию до стопа × число контрактов)."
+};
+function loadQuestions(){try{var s=dbGet(KQ);if(s){var p=JSON.parse(s);if(p&&p.length)return p}}catch(e){}return JSON.parse(JSON.stringify(DEFAULT_QUESTIONS))}
+function loadSurveys(){try{return JSON.parse(dbGet(KS)||"[]")}catch(e){return[]}}
+function loadRec(){try{return Object.assign({},DEFAULT_REC,JSON.parse(dbGet(KR)||"{}"))}catch(e){return Object.assign({},DEFAULT_REC)}}
+var QS=loadQuestions(), REC=loadRec();
+var answers={}, view="form", lastResult=null, stepKey=null;
+
+function $(s,r){return (r||document).querySelector(s)}
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
+function num(v){return (v===""||v==null||isNaN(parseFloat(v)))?null:parseFloat(v)}
+function fmt(x,d){if(x==null||isNaN(x))return "—";return Number(x).toLocaleString("ru-RU",{maximumFractionDigits:d==null?2:d})}
+function sizeIsOverOne(){return ["Более 1 и до 3","Более 3 и до 5","Более 5"].indexOf(answers.size)>=0}
+function repContracts(){if(answers.contracts!=null&&answers.contracts!=="")return num(answers.contracts);var m={"До 1 контракта":1,"Более 1 и до 3":2,"Более 3 и до 5":4,"Более 5":6};return m[answers.size]||null}
+function direction(){var p=num(answers.price),t=num(answers.target);if(p==null||t==null||p===t)return null;return t>p?"long":"short"}
+function movePct(){var p=num(answers.price),t=num(answers.target);if(p==null||t==null)return null;return Math.abs(t-p)/p*100}
+function adrPct(){var iv=num(answers.iv);return iv==null?null:iv/Math.sqrt(252)}
+function isCounterTrend(){var d=direction();if(!d)return false;return (d==="long"&&answers.trend==="Нисходящий")||(d==="short"&&answers.trend==="Восходящий")}
+function cancelSideBad(){var d=direction(),p=num(answers.price),c=num(answers.cancel);if(!d||p==null||c==null)return false;return (d==="long"&&c>=p)||(d==="short"&&c<=p)}
+function hedgeBE(){var d=direction(),spot=num(answers.price),K=num(answers.hedge_strike),Pr=num(answers.hedge_prem);if(!d||spot==null||K==null||Pr==null)return null;var side=d==="long"?"PUT":"CALL";var be=side==="PUT"?K-Pr:K+Pr;var need=side==="PUT"?spot-be:be-spot;var pct=spot?need/spot*100:null;var floor=side==="PUT"?(K-spot)-Pr:(spot-K)-Pr;return {side:side,be:be,need:need,pct:pct,floor:floor,dir:side==="PUT"?"упасть":"вырасти"}}
+function optBE(){var d=direction(),spot=num(answers.price),K=num(answers.opt_strike),Pr=num(answers.opt_prem);if(!d||spot==null||K==null||Pr==null)return null;var side=d==="long"?"CALL":"PUT";var be=side==="CALL"?K+Pr:K-Pr;var need=side==="CALL"?be-spot:spot-be;var pct=spot?need/spot*100:null;return {side:side,be:be,need:need,pct:pct,dir:side==="CALL"?"вырасти":"упасть"}}
+function optionZone(){var mp=movePct(),h=answers.horizon;if(mp==null||!h)return null;var col=mp<3?0:(mp<=5?1:2);var row=(h==="Внутри дня"||h==="1–2 дня")?0:(h==="2–3 дня"?1:2);var M=[
+ [{name:"Короткий ATM (или фьючерс+SL)",dte:"7–15",delta:"~0.5",raw:"1.2–1.4",theta:"~1.0"},{name:"Короткий OTM",dte:"7–15",delta:"0.3–0.4",raw:"1.3–1.6",theta:"1.0–1.2"},{name:"Короткий OTM",dte:"5–10",delta:"0.15–0.35",raw:"2.0–3.6",theta:"1.5–2.0"}],
+ [{name:"Дальний OTM",dte:"90+",delta:"0.12–0.20",raw:"1.5–1.6",theta:"1.2–1.4"},{name:"Средний срок",dte:"30–45",delta:"~0.3",raw:"1.2–1.5",theta:"1.0–1.2"},{name:"Короткий OTM",dte:"8–15",delta:"0.2–0.35",raw:"1.6–2.4",theta:"1.4–1.6"}],
+ [{name:"Дальний OTM",dte:"120+",delta:"0.12–0.18",raw:"1.5–1.6",theta:"1.3–1.5"},{name:"Средний–дальний",dte:"60–120",delta:"~0.2",raw:"1.3–1.5",theta:"1.1–1.3"},{name:"Средний срок",dte:"30–60",delta:"0.25–0.4",raw:"1.4–1.8",theta:"1.2–1.4"}]];
+ var z=Object.assign({},M[row][col]);z.side=direction()==="long"?"CALL":"PUT";return z}
+
+function compute(){
+  var stops=[],warns=[],info=[],kv=[],calc=[];
+  var d=direction(),mp=movePct(),adr=adrPct(),atr=num(answers.atr);
+  var p=num(answers.price),t=num(answers.target),cancel=num(answers.cancel);
+
+  if(answers.emotion==="На эмоциях (отыгрыш, FOMO, усталость, спешка)") stops.push(REC.emotion);
+  if(cancel==null) stops.push(REC.cancel);
+  if(d==null) stops.push(REC.nomove);
+  if(answers.trigger==="Чёткого триггера пока нет") stops.push(REC.notrigger);
+  if(isCounterTrend() && answers.reversal!=="Да, есть подтверждение") stops.push(REC.counter);
+  if(sizeIsOverOne() && answers.protection==="Ничего" && answers.instrument!=="Опцион") stops.push(REC.nosl);
+  if(cancelSideBad()) stops.push(REC.cancelside);
+  if(answers.trend==="Не знаю") warns.push(REC.trendunk);
+
+  if(d) kv.push(["Направление", d==="long"?"Лонг (рост)":"Шорт (падение)"]);
+  if(mp!=null) kv.push(["Ожидаемое движение", fmt(mp,2)+"%  ("+fmt(Math.abs(t-p),1)+" USDT)"]);
+  if(adr!=null) kv.push(["Среднедневное (из IV)","≈ "+fmt(adr,2)+"%"]);
+  if(mp!=null&&adr!=null){ if(mp<adr) warns.push(REC.belowadr+" (движение "+fmt(mp,1)+"% < ADR "+fmt(adr,1)+"%)."); if(adr>3) info.push("Дневной диапазон ≈ "+fmt(adr,1)+"% (>3%): вероятность пройти 3% за день высокая."); }
+
+  var bigMove=mp!=null&&mp>=5, smallMove=mp!=null&&mp<3;
+  var highLev=answers.leverage==="x20 и выше";
+  var fastConf=(answers.horizon==="Внутри дня"||answers.horizon==="1–2 дня")&&answers.confidence==="Высокая";
+  var preferOption=bigMove||highLev||fastConf, userInstr=answers.instrument;
+  var chosen=userInstr==="Опцион"?"option":(userInstr==="Фьючерс"?"futures":(preferOption?"option":"futures"));
+
+  if(smallMove&&chosen==="futures"&&answers.horizon&&answers.horizon!=="Внутри дня") warns.push(REC.smallfut);
+  if(answers.news==="Проверен — есть крупное событие") warns.push(REC.news);
+  if(answers.news==="Не проверял") warns.push("Календарь новостей не проверен — сделайте это до входа.");
+  if(isCounterTrend()&&answers.reversal==="Да, есть подтверждение") warns.push("Вход против тренда (есть подтверждение разворота) — держите риск строго ограниченным, размер ниже обычного.");
+
+  var deposit=num(answers.deposit),budget=null;
+  if(answers.riskmode==="% от депозита"&&deposit!=null&&num(answers.riskpct)!=null) budget=deposit*num(answers.riskpct)/100;
+  else if(answers.riskmode==="USDT"&&num(answers.riskusd)!=null) budget=num(answers.riskusd);
+  if(answers.riskmode==="% от депозита"&&deposit==null) warns.push("Указан риск в % депозита, но не задан размер депозита — не могу проверить превышение.");
+
+  var rec={instrument:chosen,lines:[]};
+
+  if(chosen==="option"){
+    var z=optionZone();
+    var reason=bigMove?"крупное ожидаемое движение":(highLev?"высокое плечо неэффективно на фьючерсе":(fastConf?"уверенный короткий горизонт":"выбран опцион"));
+    rec.lines.push("Инструмент: опцион (directional). Причина: "+reason+".");
+    if(z){
+      rec.lines.push("Сторона: "+z.side+" (по направлению рынка). Зона: "+z.name+", DTE "+z.dte+", дельта "+z.delta+".");
+      kv.push(["Опцион",z.side+" · DTE "+z.dte+" · Δ "+z.delta]);
+      kv.push(["Ожидаемый RR (сырой)","≈ "+z.raw]);
+      kv.push(["Ожидаемый RR (с тетой)","≈ "+z.theta]);
+      info.push("Сырой RR — на чистом движении цены без распада. С тетой — на ваш горизонт удержания. Сверяйтесь со справочником «Карта выбора опциона».");
+      if(parseFloat(z.theta)<1.3) warns.push("RR с тетой ниже ~1.3 — край слабый, рассмотрите другую зону или откажитесь.");
+    }
+    var ob=optBE();
+    if(ob){
+      kv.push(["Опцион: безубыток по споту", fmt(ob.be,1)+" USDT"]);
+      kv.push(["Спот должен "+ob.dir, fmt(ob.need,1)+" USDT ("+fmt(ob.pct,1)+"%)"]);
+      info.push("Безубыток опциона указан на дату экспирации; до неё опцион может выйти в плюс раньше за счёт временной стоимости.");
+      calc.push("Безубыток опциона: "+ob.side+" со страйком "+fmt(num(answers.opt_strike),0)+" и премией "+fmt(num(answers.opt_prem),1)+" окупается при споте "+fmt(ob.be,1)+" (спот должен "+ob.dir+" на "+fmt(ob.need,1)+" USDT ≈ "+fmt(ob.pct,1)+"%).");
+      if(t!=null&&ob.need!=null&&Math.abs(t-p)<ob.need) warns.push("Ваша цель не доходит до безубытка опциона при экспирации — прибыль возможна только раньше за счёт временной стоимости. Пересмотрите страйк или цель.");
+    } else if(userInstr==="Опцион"){ warns.push("Укажите страйк и премию опциона — без них не посчитать безубыток по движению спота."); }
+    var iv=num(answers.iv);
+    if(iv!=null){ if(iv<45) info.push("IV низкая ("+fmt(iv,0)+"%) — можно брать короче и дальше OTM, тета дешёвая."); else if(iv>65) info.push("IV высокая ("+fmt(iv,0)+"%) — смещайтесь к более длинному сроку и ближе к деньгам."); }
+  } else {
+    rec.lines.push("Инструмент: фьючерс.");
+    var prot=answers.protection, forceHedge=preferOption&&userInstr==="Фьючерс";
+    if(forceHedge){ rec.lines.push("Замах крупный/быстрый — на фьючерсе обязателен хедж опционом (хотя бы частичный): короткий стоп выбьет раньше хода."); if(prot!=="Хеджирую опционом") warns.push("Рекомендуется хедж опционом, а не голый SL."); }
+    if(prot==="Хеджирую опционом"||forceHedge){
+      var hside=d==="long"?"PUT":"CALL", hdte=(answers.horizon==="Более 3 дней")?"60+":"15–30";
+      rec.lines.push("Хедж: защитный "+hside+", страйк у денег или чуть OTM, DTE "+hdte+" (≥ горизонт + запас).");
+      var hb=hedgeBE();
+      if(hb){
+        kv.push(["Хедж: безубыток по споту", fmt(hb.be,1)+" USDT"]);
+        kv.push(["Спот должен "+hb.dir, fmt(hb.need,1)+" USDT ("+fmt(hb.pct,1)+"%)"]);
+        if(hb.floor<0) kv.push(["Защищённый макс. убыток","≈ "+fmt(-hb.floor,1)+" USDT/контр."]); else kv.push(["Захеджировано в плюс","мин. ≈ +"+fmt(hb.floor,1)+" USDT/контр."]);
+        calc.push("Безубыток хеджа: "+hb.side+" со страйком "+fmt(num(answers.hedge_strike),0)+" и премией "+fmt(num(answers.hedge_prem),1)+" отбивает себя при споте "+fmt(hb.be,1)+" (спот должен "+hb.dir+" на "+fmt(hb.need,1)+" USDT ≈ "+fmt(hb.pct,1)+"%). Дальше в эту сторону хедж работает в плюс.");
+        var rcH=repContracts();
+        if(budget!=null&&rcH!=null&&hb.floor<0){ var ml=-hb.floor*rcH; kv.push(["Макс. убыток позиции","≈ "+fmt(ml,1)+" ("+rcH+" контр.)"]); if(ml>budget) warns.push("Захеджированный макс. убыток ("+fmt(ml,1)+") выше бюджета ("+fmt(budget,1)+") — уменьшите размер или возьмите страйк ближе."); }
+      } else if(prot==="Хеджирую опционом"){ warns.push("Укажите страйк и премию хедж-опциона — без них не посчитать безубыток хеджа."); }
+    }
+    if(prot==="Ставлю SL"||prot==="Ничего"){
+      if(cancel!=null&&p!=null&&t!=null&&!cancelSideBad()){
+        var riskDist=Math.abs(p-cancel), reward=Math.abs(t-p), rr=reward/riskDist;
+        kv.push(["SL на уровне отмены", fmt(cancel,1)+" USDT"]);
+        kv.push(["Риск до стопа", fmt(riskDist,1)+" USDT/контр."]);
+        kv.push(["RR (от уровня отмены)","1 : "+fmt(rr,2)]);
+        if(atr!=null){
+          var inATR=riskDist/atr, b15=d==="long"?p-1.5*atr:p+1.5*atr, b20=d==="long"?p-2.0*atr:p+2.0*atr;
+          kv.push(["Дистанция стопа в ATR","≈ "+fmt(inATR,2)+" ATR"]);
+          info.push("Стоп на уровне отмены = "+fmt(inATR,2)+" ATR. Ориентир по волатильности 1.5–2.0 ATR ≈ "+fmt(b15,1)+"–"+fmt(b20,1)+".");
+          if(inATR<1.0) warns.push("Стоп ближе 1 ATR ("+fmt(inATR,2)+") — высокий риск раннего выбивания шумом. Либо перенесите уровень отмены, либо уменьшите размер.");
+          if(inATR>3.0) info.push("Стоп дальше 3 ATR — риск на контракт крупный, держите размер меньше.");
+        }
+        if(rr<1.0) stops.push(REC.rrlow+" (RR ≈ 1:"+fmt(rr,2)+" — стоп шире цели).");
+        else if(rr<2.0){ warns.push(REC.rrlow+" (сейчас RR ≈ 1:"+fmt(rr,2)+")."); var nt=d==="long"?p+2*riskDist:p-2*riskDist; calc.push("Для RR 1:2 при стопе на уровне отмены цель должна быть ≈ "+fmt(nt,1)+" USDT."); }
+        else info.push("RR ≈ 1:"+fmt(rr,2)+" — проходит порог 1:2.");
+        var rc=repContracts();
+        if(budget!=null&&rc!=null){
+          var implied=riskDist*rc;
+          kv.push(["Риск-бюджет","≈ "+fmt(budget,1)+" USDT"]);
+          kv.push(["Риск позиции","≈ "+fmt(implied,1)+" USDT ("+rc+" контр.)"]);
+          if(implied>budget){ var maxc=Math.floor(budget/riskDist); calc.push("Превышение риска: риск до стопа "+fmt(riskDist,1)+" × "+rc+" контр. = "+fmt(implied,1)+" USDT > бюджета "+fmt(budget,1)+" USDT. Уменьшите размер до "+maxc+" контр. либо расширьте бюджет."); warns.push("Риск позиции превышает бюджет — см. расчёт."); }
+          else info.push("Риск позиции в пределах бюджета.");
+        }
+      } else if(!cancelSideBad()){ warns.push("Не заданы цена / цель / уровень отмены — не могу рассчитать RR и стоп."); }
+    }
+  }
+
+  var verdict=stops.length?"no":(warns.length?"caution":"go");
+  var head=verdict==="no"?REC.no:(verdict==="caution"?REC.caution:REC.go);
+  return {verdict:verdict,head:head,stops:stops,warns:warns,info:info,kv:kv,calc:calc,rec:rec,
+    checklist:["SL или хедж фактически выставлен в терминале","Размер позиции в пределах риск-бюджета","Уровень отмены сделки стоит в стакане","Вход не против тренда без подтверждения","Новости на горизонт сделки проверены"]};
+}
+
+function visible(q){
+  if(q.hideIfOption && answers.instrument==="Опцион")return false;
+  if(q.dependsCounterTrend && !isCounterTrend())return false;
+  if(q.dependsHedge && answers.protection!=="Хеджирую опционом")return false;
+  if(q.dependsOption && answers.instrument!=="Опцион")return false;
+  if(q.dependsRisk && answers.riskmode!==q.dependsRisk)return false;
+  return true;
+}
+function visibleList(){return QS.filter(visible)}
+function answered(q){var a=answers[q.key];if(q.optional)return true;if(q.type==="multi")return Array.isArray(a)&&a.length>0;if(q.type==="number")return num(a)!=null;return a!=null&&a!==""}
+
+function setView(v){if(v==="card"){openCard();return}view=v;[].forEach.call($("#nav").children,function(b){b.classList.toggle("active",b.dataset.view===v)});render()}
+function render(){
+  var app=$("#app");app.innerHTML="";
+  var c=el("div","view");
+  if(view==="form")c.appendChild(renderWizard());
+  else if(view==="result")c.appendChild(renderResult());
+  else if(view==="saved")c.appendChild(renderSaved());
+  else if(view==="settings")c.appendChild(renderSettings());
+  app.appendChild(c);
+  $("#banner").classList.toggle("show",!LS_OK);
+  if(!LS_OK)$("#banner").innerHTML="Предпросмотр не сохраняет данные между перезагрузками. <b>Скачайте файл</b> и откройте в Safari (можно «Поделиться → На экран Домой») — тогда сохранение и список опросов работают. Для бэкапа есть «Экспорт» в Настройках.";
+}
+
+function currentQ(){var l=visibleList();var q=l.filter(function(x){return x.key===stepKey})[0];return q||l[0]}
+function renderWizard(){
+  var frag=document.createDocumentFragment();
+  var list=visibleList();if(!list.length)return frag;
+  var q=currentQ();stepKey=q.key;var idx=list.indexOf(q);
+  var head=el("div","wizhead");
+  head.innerHTML='<span class="blk">'+BLOCKS[q.block]+'</span><a href="#" class="toplink" onclick="openCard();return false;">карта выбора опциона</a><a href="#" class="toplink" onclick="openInstall();return false;">как установить на iPhone</a><span class="cnt">шаг '+(idx+1)+' из '+list.length+'</span>';
+  frag.appendChild(head);
+  var prog=el("div","prog");prog.innerHTML='<i style="width:'+Math.round(idx/(list.length-1||1)*100)+'%"></i>';frag.appendChild(prog);
+  var step=el("div","block step");
+  step.appendChild(el("div","label",q.label+(q.optional?' <span style="color:var(--faint);font-weight:400">— необяз.</span>':"")));
+  if(q.help)step.appendChild(el("div","help",q.help));
+  if(TERMS[q.key]){var dt=el("details","term");dt.innerHTML='<summary>Что это и зачем</summary><div class="tbody">'+TERMS[q.key]+'</div>';step.appendChild(dt);}
+  step.appendChild(renderInput(q));
+  var live=el("div");live.id="liveCallout";live.innerHTML=liveCallout(q);step.appendChild(live);
+  var nudge=el("div","nudge hidden");nudge.id="nudge";nudge.textContent="Ответьте на вопрос, чтобы продолжить.";step.appendChild(nudge);
+  frag.appendChild(step);
+  var act=el("div","actions");
+  var back=el("button","btn ghost","Назад");back.disabled=idx===0;
+  back.onclick=function(){if(idx>0){stepKey=list[idx-1].key;render();window.scrollTo(0,0)}};
+  var last=idx===list.length-1;
+  var next=el("button","btn primary",last?"Рассчитать рекомендацию":"Далее");
+  next.onclick=function(){ if(!answered(q)){$("#nudge").classList.remove("hidden");return}
+    var l2=visibleList();var ci=l2.filter(function(x){return x.key===q.key})[0];var i2=l2.indexOf(ci);
+    if(i2>=l2.length-1){lastResult=compute();setView("result");window.scrollTo(0,0);} else {stepKey=l2[i2+1].key;render();window.scrollTo(0,0);} };
+  act.appendChild(back);act.appendChild(next);
+  var clr=el("button","btn ghost","Сбросить");clr.onclick=function(){if(confirm("Очистить все ответы и начать заново?")){answers={};stepKey=null;render()}};
+  act.appendChild(clr);frag.appendChild(act);
+  return frag;
+}
+function renderInput(q){
+  if(q.type==="number"){
+    var inp=el("input");inp.type="number";inp.inputMode="decimal";inp.value=answers[q.key]!=null?answers[q.key]:"";
+    inp.oninput=function(){answers[q.key]=inp.value;$("#nudge").classList.add("hidden");updateLive()};
+    var w=el("div");w.appendChild(inp);if(q.unit)w.appendChild(el("div","unit",q.unit));return w;
+  }
+  var opts=el("div","opts");
+  (q.options||[]).forEach(function(o){
+    var sel=q.type==="multi"?((answers[q.key]||[]).indexOf(o)>=0):(answers[q.key]===o);
+    var btn=el("button","opt"+(sel?" sel":""),o);
+    btn.onclick=function(){
+      if(q.type==="multi"){var arr=answers[q.key]||[];var i=arr.indexOf(o);if(i>=0)arr.splice(i,1);else arr.push(o);answers[q.key]=arr;}
+      else answers[q.key]=o;
+      $("#nudge").classList.add("hidden");
+      [].forEach.call(opts.children,function(x){var s=q.type==="multi"?((answers[q.key]||[]).indexOf(x.textContent)>=0):(answers[q.key]===x.textContent);x.classList.toggle("sel",s)});
+      updateLive();
+    };
+    opts.appendChild(btn);
+  });
+  return opts;
+}
+function updateLive(){var lc=$("#liveCallout");if(lc)lc.innerHTML=liveCallout(currentQ())}
+function co(type,msg){return '<div class="callout '+type+'">'+msg+'</div>'}
+function liveCallout(q){
+  var d=direction(),mp=movePct(),adr=adrPct();
+  switch(q.key){
+    case "emotion": if(answers.emotion==="На эмоциях (отыгрыш, FOMO, усталость, спешка)")return co("stop","Эмоциональный вход. По итогам опроса будет рекомендация переждать — лучшие сделки берутся на холодную голову.");break;
+    case "news": if(answers.news==="Проверен — есть крупное событие")return co("warn","Крупное событие на горизонте: гэп-риск. Уменьшите размер или переждите выход новости.");if(answers.news==="Не проверял")return co("warn","Проверьте экономический календарь до входа — новости двигают рынок резко.");break;
+    case "target": if(d&&mp!=null){var cls=mp<3?"малое — фьючерс с коротким SL, без долгого удержания":(mp<=5?"среднее — решает горизонт и уверенность":"крупное — вероятно эффективнее опцион");return co("info",(d==="long"?"Лонг":"Шорт")+", движение ≈ "+fmt(mp,2)+"%. Это "+cls+".");}break;
+    case "trend": if(answers.trend==="Не знаю")return co("warn","Тренд не определён — вход рискован: непонятно, не идёте ли против рынка. Сначала определите направление.");if(isCounterTrend())return co("warn","Направление сделки против тренда. Дальше уточним, есть ли подтверждение разворота.");break;
+    case "reversal": if(answers.reversal==="Нет")return co("stop","Контртренд без подтверждения — «ловля ножей». Дождитесь подтверждения смены тренда или откажитесь.");if(answers.reversal==="Да, есть подтверждение")return co("warn","Контртренд с подтверждением — допустимо, но риск повышен: размер ниже обычного.");break;
+    case "trigger": if(answers.trigger==="Чёткого триггера пока нет")return co("stop","Нет конкретного триггера — вход преждевременный. Дождитесь сигнала.");break;
+    case "horizon": if(mp!=null&&mp<3&&answers.instrument!=="Опцион"&&answers.horizon&&answers.horizon!=="Внутри дня")return co("warn","Малое движение (<3%) и удержание дольше 1 дня на фьючерсе — невыгодно. Сократите горизонт или рассмотрите опцион.");break;
+    case "size": if(sizeIsOverOne())return co("info","Позиция больше 1 контракта — защита (SL или хедж) будет обязательной.");break;
+    case "leverage": if(answers.leverage==="x20 и выше")return co("info","Высокое плечо: короткий стоп выбьет на шуме. Часто эффективнее опцион вместо фьючерса.");break;
+    case "protection": if(sizeIsOverOne()&&answers.protection==="Ничего")return co("stop","Размер больше 1 контракта без защиты — такую сделку не открываем.");if(answers.protection==="Хеджирую опционом")return co("info","Дальше укажите страйк и премию опциона — посчитаю безубыток хеджа по движению спота.");break;
+    case "cancel": if(cancelSideBad())return co("stop","Уровень отмены не с той стороны: для лонга он ниже входа, для шорта — выше.");if(d&&num(answers.cancel)!=null&&num(answers.price)!=null){var rdv=Math.abs(num(answers.price)-num(answers.cancel));var ex="Риск до стопа ≈ "+fmt(rdv,1)+" USDT/контр.";var at=num(answers.atr);if(at)ex+=" ("+fmt(rdv/at,2)+" ATR)";return co("info",ex);}break;
+    case "hedge_prem": var hb=hedgeBE();if(hb)return co("info","Безубыток хеджа: спот "+fmt(hb.be,1)+" (должен "+hb.dir+" на "+fmt(hb.need,1)+" USDT ≈ "+fmt(hb.pct,1)+"%). "+(hb.floor<0?"Защищённый макс. убыток ≈ "+fmt(-hb.floor,1)+" USDT/контр.":"Позиция захеджирована в плюс, мин. ≈ +"+fmt(hb.floor,1)+" USDT/контр."));break;
+    case "opt_prem": var ob=optBE();if(ob)return co("info","Безубыток опциона: спот "+fmt(ob.be,1)+" (должен "+ob.dir+" на "+fmt(ob.need,1)+" USDT ≈ "+fmt(ob.pct,1)+"%). На экспирации; до неё возможен плюс раньше за счёт временной стоимости.");break;
+    case "iv": if(adr!=null){var m="Среднедневное движение ≈ "+fmt(adr,2)+"% (IV ÷ √252).";if(mp!=null&&mp<adr)return co("warn",m+" Ваша цель ("+fmt(mp,1)+"%) меньше дневного шума — на фьючерсе край слабый.");return co("info",m);}break;
+  }
+  return "";
+}
+
+function renderResult(){
+  var r=lastResult||compute();var frag=document.createDocumentFragment();
+  var v=el("div","verdict v-"+r.verdict);
+  v.innerHTML='<div class="light"></div><div><h2>'+(r.verdict==="go"?"Можно работать":r.verdict==="caution"?"Под вопросом":"Не входить")+'</h2><p>'+r.head+'</p></div>';
+  frag.appendChild(v);
+  if(r.stops.length){var s=el("div","rcard");s.appendChild(el("h3",null,"Причины отказа"));r.stops.forEach(function(x){s.appendChild(el("div","flag stop",'<span class="dot"></span><span>'+x+'</span>'))});frag.appendChild(s);}
+  var rc=el("div","rcard");rc.appendChild(el("h3",null,"Рекомендация по структуре"));
+  r.rec.lines.forEach(function(x){rc.appendChild(el("div","flag info",'<span class="dot"></span><span>'+x+'</span>'))});
+  if(!r.rec.lines.length)rc.appendChild(el("div","note","Заполните цену, цель и горизонт, чтобы получить конкретику."));
+  frag.appendChild(rc);
+  if(r.kv.length){var k=el("div","rcard");k.appendChild(el("h3",null,"Показатели и уровни"));r.kv.forEach(function(p){var row=el("div","kv");row.innerHTML='<span class="k">'+p[0]+'</span><span class="v">'+p[1]+'</span>';k.appendChild(row)});frag.appendChild(k);}
+  if(r.calc.length){var cc=el("div","rcard");cc.appendChild(el("h3",null,"Расчёты"));r.calc.forEach(function(x){cc.appendChild(el("div","note",x))});frag.appendChild(cc);}
+  if(r.warns.length){var w=el("div","rcard");w.appendChild(el("h3",null,"Предупреждения"));r.warns.forEach(function(x){w.appendChild(el("div","flag warn",'<span class="dot"></span><span>'+x+'</span>'))});frag.appendChild(w);}
+  if(r.info.length){var i=el("div","rcard");i.appendChild(el("h3",null,"Пояснения"));r.info.forEach(function(x){i.appendChild(el("div","flag info",'<span class="dot"></span><span>'+x+'</span>'))});frag.appendChild(i);}
+  var ch=el("div","rcard checklist");ch.appendChild(el("h3",null,"Проверь перед кликом"));r.checklist.forEach(function(x){ch.appendChild(el("div","flag",'<span class="dot"></span><span>'+x+'</span>'))});frag.appendChild(ch);
+  var act=el("div","actions");
+  var save=el("button","btn primary","Сохранить результат");save.onclick=function(){saveSurvey(r)};
+  var back=el("button","btn ghost","Назад к ответам");back.onclick=function(){setView("form")};
+  act.appendChild(save);act.appendChild(back);frag.appendChild(act);
+  return frag;
+}
+function nextNum(){var n=parseInt(dbGet(KN)||"0",10)+1;dbSet(KN,String(n));return n}
+function saveSurvey(r){var list=loadSurveys(),now=new Date();var rec={num:nextNum(),savedAt:now.toLocaleString("ru-RU"),iso:now.toISOString(),verdict:r.verdict,answers:JSON.parse(JSON.stringify(answers)),summary:r.rec.lines.slice(),kv:r.kv.slice()};list.unshift(rec);dbSet(KS,JSON.stringify(list));alert("Сохранено как опрос №"+rec.num+" ("+rec.savedAt+")");setView("saved")}
+
+function renderSaved(){
+  var frag=document.createDocumentFragment();
+  var head=el("div","block-h");head.style.margin="6px 2px 12px";head.innerHTML='<h2 style="font-size:16px">Сохранённые опросы</h2>';frag.appendChild(head);
+  var list=loadSurveys();
+  if(!list.length){frag.appendChild(el("div","empty","Пока нет сохранённых опросов. Пройдите опрос и сохраните результат — ему присвоится номер и время."));return frag}
+  list.forEach(function(s){
+    var row=el("div","srow");
+    var pill=s.verdict==="go"?'<span class="pill go">можно</span>':s.verdict==="caution"?'<span class="pill caution">под вопросом</span>':'<span class="pill no">не входить</span>';
+    var top=el("div","top");top.innerHTML='<span class="num">№ '+s.num+'</span>'+pill+'<span class="ts">'+s.savedAt+'</span>';
+    var det=el("div","sdetail");var html="";
+    (s.summary||[]).forEach(function(x){html+='<div class="note">• '+x+'</div>'});
+    (s.kv||[]).forEach(function(p){html+='<div class="kv"><span class="k">'+p[0]+'</span><span class="v">'+p[1]+'</span></div>'});
+    html+='<div style="margin-top:10px;font-size:12px;color:var(--faint)">Ответы:</div>';
+    QS.forEach(function(q){var a=s.answers[q.key];if(a!=null&&a!==""&&!(Array.isArray(a)&&!a.length)){html+='<div class="kv"><span class="k">'+q.label+'</span><span class="v">'+(Array.isArray(a)?a.join(", "):a)+'</span></div>'}});
+    html+='<div class="actions"><button class="btn danger" data-del="'+s.num+'">Удалить опрос</button></div>';
+    det.innerHTML=html;top.onclick=function(){det.classList.toggle("open")};
+    row.appendChild(top);row.appendChild(det);frag.appendChild(row);
+    det.querySelector("[data-del]").onclick=function(){if(confirm("Удалить опрос №"+s.num+"?")){var l=loadSurveys().filter(function(x){return x.num!==s.num});dbSet(KS,JSON.stringify(l));render()}};
+  });
+  return frag;
+}
+
+function renderSettings(){
+  var frag=document.createDocumentFragment();
+  var h=el("div","block-h");h.style.margin="6px 2px 8px";h.innerHTML='<h2 style="font-size:16px">Настройки</h2>';frag.appendChild(h);
+  frag.appendChild(el("div","note","Резервное копирование сохранённых опросов. Экспорт сохраняет всё в файл JSON, импорт — восстанавливает из него. Удобно переносить между устройствами или хранить бэкап."));
+  var tools=el("div","actions");
+  var exp=el("button","btn primary","Экспорт (бэкап JSON)");exp.onclick=exportData;
+  var imp=el("button","btn","Импорт JSON");imp.onclick=importData;
+  tools.appendChild(exp);tools.appendChild(imp);frag.appendChild(tools);
+  var list=loadSurveys();
+  frag.appendChild(el("div","note","Сейчас сохранено опросов: "+list.length+"."));
+  return frag;
+}
+function mkField(label,val,onsave,area){var w=el("div");w.appendChild(el("label",null,label));var inp=area?el("textarea"):el("input");if(!area)inp.type="text";inp.value=val;inp.onchange=function(){onsave(inp.value)};w.appendChild(inp);return w}
+function reorder(idx,dir){var q=QS[idx],block=q.block;var same=QS.map(function(x,i){return x.block===block?i:-1}).filter(function(i){return i>=0});var pos=same.indexOf(idx),np=pos+dir;if(np<0||np>=same.length)return;var a=same[pos],bI=same[np];var tmp=QS[a];QS[a]=QS[bI];QS[bI]=tmp;persistQ();render()}
+function persistQ(){dbSet(KQ,JSON.stringify(QS))}
+function exportData(){var data={questions:QS,rectexts:REC,surveys:loadSurveys(),counter:dbGet(KN)||"0"};var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="blackbird_backup_"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url)}
+function importData(){var inp=document.createElement("input");inp.type="file";inp.accept="application/json";inp.onchange=function(){var f=inp.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){try{var dd=JSON.parse(rd.result);if(dd.questions){QS=dd.questions;dbSet(KQ,JSON.stringify(QS))}if(dd.rectexts){REC=Object.assign({},DEFAULT_REC,dd.rectexts);dbSet(KR,JSON.stringify(dd.rectexts))}if(dd.surveys)dbSet(KS,JSON.stringify(dd.surveys));if(dd.counter)dbSet(KN,String(dd.counter));alert("Импорт выполнен.");render()}catch(e){alert("Не удалось прочитать файл: "+e.message)}};rd.readAsText(f)};inp.click()}
+
+function openCard(){
+  $("#modalInner").innerHTML=
+  '<div class="mh"><h2>Карта выбора опциона</h2><button class="btn ghost" style="margin-left:auto;padding:6px 12px" onclick="closeModal()">Закрыть</button></div>'+
+  '<div class="note" style="margin-bottom:10px">Движение переводите в % от спота (например $100 при 1756 ≈ 5.7%). Столбец по движению, строка по горизонту — читаете срок и дельту. Срок правьте по IV. Сторона — по направлению рынка.</div>'+CARD_SVG+
+  '<div class="legend"><span><i style="background:#D85A30"></i>короткий OTM</span><span><i style="background:#378ADD"></i>дальний OTM</span><span><i style="background:#1D9E75"></i>средний срок</span><span><i style="background:#888780"></i>фьючерс / SL</span></div>'+
+  '<div class="note" style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px"><b>IV → срок:</b> низкая (&lt;45%) — короче и дальше OTM · высокая (&gt;65%) — длиннее и ближе к деньгам.<br><b>Не входить, если:</b> RR ниже 1:2 · нет уровня отмены · нет ожидания хода · позиция &gt;1 контракта без SL/хеджа · вход против тренда без подтверждения.</div>';
+  $("#modal").classList.add("open");
+}
+function closeModal(){$("#modal").classList.remove("open")}
+function openInstall(){
+  $("#modalInner").innerHTML=
+  '<div class="mh"><h2>Как установить на iPhone</h2><button class="btn ghost" style="margin-left:auto;padding:6px 12px" onclick="closeModal()">Закрыть</button></div>'+
+  '<div class="note">Чтобы опросник стал приложением с иконкой и сохранял опросы между запусками:</div>'+
+  '<ol style="margin:12px 0 0;padding-left:20px;line-height:1.75;font-size:14px;color:var(--txt)">'+
+  '<li>Нажмите кнопку <b>«Поделиться»</b> — квадрат со стрелкой вверх внизу экрана Safari.</li>'+
+  '<li>Прокрутите меню и выберите <b>«На экран Домой»</b> (Add to Home Screen).</li>'+
+  '<li>Нажмите <b>«Добавить»</b> — на рабочем столе появится иконка Black Bird.</li>'+
+  '<li>Запускайте опросник с этой иконки — он откроется как приложение и работает без интернета.</li>'+
+  '</ol>'+
+  '<div class="note" style="margin-top:14px;border-top:1px solid var(--line);padding-top:11px"><b>Важно:</b> запускайте именно с иконки на экране «Домой» — так сохранённые опросы остаются между сессиями. Для надёжного бэкапа периодически делайте <b>Экспорт</b> в Настройках, а на новом устройстве восстанавливайте через <b>Импорт</b>.</div>';
+  $("#modal").classList.add("open");
+}
+$("#modal").onclick=function(e){if(e.target===$("#modal"))closeModal()};
+var CARD_SVG=
+'<svg viewBox="0 0 680 300" style="width:100%;height:auto;font-family:var(--sans)">'+
+'<style>.ct{fill:var(--txt);font-size:13px}.ctm{fill:var(--muted);font-size:11px}.cl{fill:#1a1407;font-size:13px;font-weight:600}.cls{font-size:10.5px}</style>'+
+hcell(118,40,"меньше 3%")+hcell(295,40,"3–5%")+hcell(472,40,"больше 5%")+
+'<text class="ct" x="6" y="92">1 день</text><text class="ct" x="6" y="156">2–3 дня</text><text class="ct" x="6" y="220">&gt;3 дн.</text>'+
+zc(118,66,"#888780","Фьючерс + SL","ATM · DTE 7–15")+zc(295,66,"#D85A30","Короткий OTM","DTE 7–15 · Δ0.3–0.4")+zc(472,66,"#D85A30","Короткий OTM","DTE 5–10 · Δ0.15–0.35")+
+zc(118,130,"#378ADD","Дальний OTM","DTE 90+ · Δ0.12–0.20")+zc(295,130,"#1D9E75","Средний срок","DTE 30–45 · по IV")+zc(472,130,"#D85A30","Короткий OTM","DTE 8–15 · Δ0.2–0.35")+
+zc(118,194,"#378ADD","Дальний OTM","DTE 120+ · Δ0.12–0.18")+zc(295,194,"#1D9E75","Средний–дальний","DTE 60–120 · Δ0.2")+zc(472,194,"#1D9E75","Средний срок","DTE 30–60 · Δ0.25–0.4")+
+'<text class="ctm" x="118" y="276">Горизонт ↓ · движение (% спота) →</text></svg>';
+function hcell(x,y,t){return '<rect x="'+x+'" y="'+y+'" width="168" height="24" rx="6" fill="var(--card2)" stroke="var(--line)"/><text class="ct" x="'+(x+84)+'" y="'+(y+16)+'" text-anchor="middle">'+t+'</text>'}
+function zc(x,y,col,t1,t2){return '<rect x="'+x+'" y="'+y+'" width="168" height="56" rx="8" fill="'+col+'"/><text class="cl" x="'+(x+84)+'" y="'+(y+24)+'" text-anchor="middle">'+t1+'</text><text class="cl cls" x="'+(x+84)+'" y="'+(y+42)+'" text-anchor="middle">'+t2+'</text>'}
+
+[].forEach.call($("#nav").children,function(b){b.onclick=function(){setView(b.dataset.view)}});
+render();
+</script>
+</body>
+</html>
